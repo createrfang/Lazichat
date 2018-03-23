@@ -1,4 +1,4 @@
-#define MAXCONN 10
+#define MAXCONN 20
 
 #define SERVER_PORT	6666 //侦听端口
 

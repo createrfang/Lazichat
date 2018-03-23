@@ -40,11 +40,11 @@ int bindsocket(int sockfd, struct sockaddr_in* serverAddr){
 	return 0;
 }
 
-struct ClientCONN clist[20];
+struct ClientCONN clist[MAXCONN];
 int main()
 {	
 	int sockfd, comfd;
-	for(int i = 0; i < 20 ;i++){
+	for(int i = 0; i < MAXCONN ;i++){
 		clist[i].id = -1;
 	}
 	struct sockaddr_in serverAddr, clientAddr;
@@ -73,10 +73,10 @@ int main()
 			close(sockfd);
 			return -1;
 		}
-		for(int i = 0; i < 20 ;i ++){
+		for(int i = 0; i < MAXCONN ;i ++){
 			if(clist[i].id!=-1)
 				continue;
-			if(i==20){
+			if(i==MAXCONN){
 				printf("Error!!! Overload!\n");
 				break;
 			}
@@ -104,7 +104,7 @@ void* recvfromclient(void* arg){
 	int cnt = 0;
 	int thisid;
 	struct Mesg mesg;
-	for(int i = 0; i < 20 ;i ++)
+	for(int i = 0; i <MAXCONN ;i ++)
 		if(clist[i].sockid == comfd){
 			thisid = i;
 			break;
@@ -116,8 +116,26 @@ void* recvfromclient(void* arg){
 		switch(mesg.t){
 			case ask_time:{
 				sentcurtime(comfd);
+				break;
 			}
 			case ask_client_list:{
+				int num[MAXCONN];
+				memset(num,0,sizeof(int)*MAXCONN);
+				int sum = 0;
+				for(int i=0; i<MAXCONN;i++){
+					if(clist[i].id!=-1){
+						num[sum++]=i;
+					}
+				}
+				struct Mesg mesg;
+				mesg.t = ask_client_list;
+				mesg.curtime = time(NULL);
+				mesg.buflen = 0;
+				sentMesg(comfd,mesg);
+				write(comfd,&sum,sizeof(sum));
+				for(int i = 0; i < sum; i++){
+					write(comfd,&clist[num[i]],sizeof(struct ClientCONN));
+				}
 				break;
 			}
 			case ask_name:{
@@ -137,6 +155,18 @@ void* recvfromclient(void* arg){
 				break;
 			}
 			case logout:{
+				struct Mesg mesg;
+				mesg.buflen = 0;
+				mesg.t = logout;
+				mesg.curtime = time(NULL);
+				sentMesg(comfd,mesg);
+				clist[thisid].id=-1;
+				close(comfd);
+				return (void*)0;
+				break;
+			}
+			default:{
+				printf("unknown request");
 				break;
 			}
    		}

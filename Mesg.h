@@ -48,6 +48,7 @@ int sentcurtime(int sockfd);
 struct Mesg recvMesg(int sockfd);
 struct Mesg ser_recvMesg(int sockfd);
 void printserverinfo(struct utsname buf);
+void printClientconninfo(struct ClientCONN cnn);
 int sentserverinfo(int sockfd);
 int recvserverinfo(int sockfd);
 int askserverinfo(int sockfd);

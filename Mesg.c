@@ -5,45 +5,6 @@
 #include <sys/utsname.h>
 #include <string.h>
 
-struct Mesg recvMesg(int sockfd){
-    struct Mesg mesg;
-    if(read(sockfd,(struct Mesg*)&mesg,sizeof(mesg))==-1){
-        printf("recieve Mesg head failed\n");
-        exit(1);
-    }
-    printf("recv packet:%d, %d, %s",mesg.t,mesg.buflen,ctime(&mesg.curtime));
-    switch(mesg.t){
-        case reply_time:{
-            printf("%s",ctime(&mesg.curtime));
-            break;
-        }
-        case ask_time:{
-            sentcurtime(sockfd);
-        }
-        case ask_client_list:{
-            break;
-        }
-        case ask_name:{
-            sentserverinfo(sockfd);
-            break;
-        }
-        case reply_name:{
-            recvserverinfo(sockfd);
-            break;
-        }
-        case send_mesg:{
-            break;
-        }
-        case logout:{
-            break;
-        }
-        case NmesgType:{
-            break;
-        }
-    }
-    //todo
-    return mesg;
-}
 
 struct Mesg ser_recvMesg(int sockfd){
     struct Mesg mesg;
@@ -108,6 +69,10 @@ void printserverinfo(struct utsname buf){
     printf("release:%s\n",buf.release);
     printf("version:%s\n",buf.version);
     printf("machine:%s\n",buf.machine);
+}
+
+void printClientconninfo(struct ClientCONN cnn){
+    printf("Client No.%d:\t addr:%s:%d\n",cnn.id,inet_ntoa(cnn.client.sin_addr), ntohs(cnn.client.sin_port));
 }
 
 int sentMesg(int sockfd, struct Mesg mesg){

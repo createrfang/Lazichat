@@ -70,12 +70,30 @@ int main(int argc, char *argv[])
 				break;
 			}
 			case 3:{
+				struct Mesg mesg;
+				mesg.buflen = 0;
+				mesg.t = ask_client_list;
+				mesg.curtime = time(NULL);
+				sentMesg(sockfd,mesg);
+				break;
+			}
+			case 4:{
 				int id;
 				char text[200];
 				memset(text,0,200);
 				scanf("%s",text);
 				scanf("%d",&id);
 				sendtext(sockfd,(const char*)text,id);
+				break;
+			}
+			case 5:{
+				struct Mesg mesg;
+				mesg.buflen = 0;
+				mesg.t = logout;
+				mesg.curtime = time(NULL);
+				sentMesg(sockfd,mesg);
+				usleep(100);
+				return 0;
 				break;
 			}
 		}
@@ -122,6 +140,25 @@ void* waitrespon(void* arg){
 				printf("Client No.%d gives a Message: %s\n",srcid,buf);
 				break;
 			}
+			case ask_client_list:{
+				int sum = recvint(sockfd);
+				struct ClientCONN cnn;
+				for(int i = 0; i < sum; i++){
+					read(sockfd,&cnn,sizeof(cnn));
+					printClientconninfo(cnn);
+				}
+				break;
+			}
+			case logout:{
+				printf("Byebye\n");
+				close(sockfd);//关闭套接字
+				return (void*)0;
+				break;
+			}
+			default:{
+				printf("unknown reply!\n");
+				break;
+			}	
 		}	
 	}
 }
