@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/utsname.h>
+#include <string.h>
 
 struct Mesg recvMesg(int sockfd){
     struct Mesg mesg;
@@ -40,6 +41,30 @@ struct Mesg recvMesg(int sockfd){
             break;
         }
     }
+    //todo
+    return mesg;
+}
+
+struct Mesg ser_recvMesg(int sockfd){
+    struct Mesg mesg;
+    if(read(sockfd,(struct Mesg*)&mesg,sizeof(mesg))==-1){
+        printf("recieve Mesg head failed\n");
+        exit(1);
+    }
+    printf("recv packet:%d, %d, %s",mesg.t,mesg.buflen,ctime(&mesg.curtime));
+    
+    //todo
+    return mesg;
+}
+
+struct Mesg cli_recvMesg(int sockfd){
+    struct Mesg mesg;
+    if(read(sockfd,(struct Mesg*)&mesg,sizeof(mesg))==-1){
+        printf("recieve Mesg head failed\n");
+        exit(1);
+    }
+    printf("recv packet:%d, %d, %s",mesg.t,mesg.buflen,ctime(&mesg.curtime));
+    
     //todo
     return mesg;
 }
@@ -114,10 +139,62 @@ int sentcurtime(int sockfd){
     return 0;
 }
 
-int senttext(const char* text){
+int sendtext(int sockfd, const char* text, int id){
+    struct Mesg mesg;
+    mesg.t = send_mesg;
+    mesg.curtime = time(NULL);
+    mesg.buflen = sizeof(text);
+    if(sentMesg(sockfd,mesg)==-1){
+        printf("send mesg failed\n");
+        return -1;
+    }
+    if(write(sockfd,text,sizeof(text))==-1){
+        return -1;
+    }
+    if(write(sockfd,&id,sizeof(id))==-1){
+        return -1;
+    }
+    printf("sent message to %d\n",id);
     return 0;
 }
 
-int recvtext(){
+int recvtext(int sockfd, char* buf, size_t len){
+    if(read(sockfd,(char*)buf,len)==-1)
+        return -1;
     return 0;
+}
+
+int recvint(int sockfd){
+    int buf;
+    if(read(sockfd,(int*)&buf,sizeof(buf))==-1){
+        printf("recv integer failed\n");
+        return -1;
+    }
+    printf("recv integer:%d\n",buf);
+    return buf;
+}
+
+int recvstuinfo(int comfd){
+	int ret = -1;
+	struct student stu;
+	void *ptr;
+	//接收客户端的数据：		
+	int nLeft = sizeof(stu);
+	ptr = &stu;
+	while(nLeft >0)
+	{
+		//接收数据：
+		ret = recv(comfd, ptr, nLeft, 0);
+		if(ret <= 0)
+		{
+			printf("recv() failed!\n");
+			close(comfd);
+			return -1;
+		}
+	
+		nLeft -= ret;
+		ptr = (char *)ptr + ret;
+	}
+	printf("Recv student:\tname: %s\tage:%d\n",stu.name, stu.age);
+	return 0;
 }

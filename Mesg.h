@@ -1,8 +1,16 @@
 #include<time.h>
 #include<sys/utsname.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <pthread.h>
 enum mesg_type 
 {
     reply_time=2,       //respon to time request
+    trans_text,         //transfer text to dest ip
     reply_name,         //response to name request
     ask_name,           //name request
     ask_time,           //ask for server time
@@ -27,10 +35,23 @@ struct Mesg
     time_t curtime;
 };
 
+struct ClientCONN
+{
+    int id;
+    int sockid;
+    struct sockaddr_in client;
+    pthread_t thread;
+};
 int sentMesg(int sockfd, struct Mesg mesg);
 int askcurtime(int sockfd);
 int sentcurtime(int sockfd);
 struct Mesg recvMesg(int sockfd);
+struct Mesg ser_recvMesg(int sockfd);
 void printserverinfo(struct utsname buf);
 int sentserverinfo(int sockfd);
+int recvserverinfo(int sockfd);
 int askserverinfo(int sockfd);
+int recvstudentinfo(int comfd);
+int sendtext(int sockfd, const char* text, int id);
+int recvtext(int sockfd, char* buf, size_t len);
+int recvint(int sockfd);

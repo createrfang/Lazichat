@@ -53,16 +53,33 @@ int main(int argc, char *argv[])
         return -1;
 	}
 	printf("%s\n",buf);
-
+	int cmd;
     pthread_t recv_thread;
     pthread_create(&recv_thread, NULL, waitrespon, (void*)&sockfd);
 	while(1){
-		if(askcurtime(sockfd)==-1)
-			printf("ask time failed!\n");
-		else printf("sent request!\n");
-//		recvMesg(sockfd);
-		askserverinfo(sockfd);
-		usleep(2000000);
+		scanf("%d",&cmd);
+		switch(cmd){
+			case 1:{
+				if(askcurtime(sockfd)==-1)
+					printf("ask time failed!\n");
+				else printf("sent request!\n");
+				break;
+			}
+			case 2:{
+				askserverinfo(sockfd);
+				break;
+			}
+			case 3:{
+				int id;
+				char text[200];
+				memset(text,0,200);
+				scanf("%s",text);
+				scanf("%d",&id);
+				sendtext(sockfd,(const char*)text,id);
+				break;
+			}
+		}
+		usleep(100000);
 	}
 	close(sockfd);//关闭套接字
 	return 0;
@@ -85,7 +102,26 @@ int sentstuinfo(int sockfd){
 
 void* waitrespon(void* arg){
     int sockfd = *(int*)arg;
+	struct Mesg mesg;
     while(1){
-		recvMesg(sockfd);	
+		mesg = ser_recvMesg(sockfd);
+		switch(mesg.t){
+			case reply_time:{
+				printf("%s",ctime(&mesg.curtime));
+				break;
+			}
+			case reply_name:{
+				recvserverinfo(sockfd);
+				break;
+			}
+			case send_mesg:{
+				char buf[mesg.buflen];
+				int srcid;
+				recvtext(sockfd,buf,mesg.buflen);
+				srcid = recvint(sockfd);
+				printf("Client No.%d gives a Message: %s\n",srcid,buf);
+				break;
+			}
+		}	
 	}
 }
