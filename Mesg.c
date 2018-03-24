@@ -24,7 +24,7 @@ struct Mesg cli_recvMesg(int sockfd){
         printf("recieve Mesg head failed\n");
         exit(1);
     }
-    printf("recv packet:%d, %d, %s",mesg.t,mesg.buflen,ctime(&mesg.curtime));
+    // printf("recv packet:%d, %d, %s",mesg.t,mesg.buflen,ctime(&mesg.curtime));
     
     //todo
     return mesg;
@@ -76,7 +76,7 @@ void printClientconninfo(struct ClientCONN cnn){
 }
 
 int sentMesg(int sockfd, struct Mesg mesg){
-    printf("send packet:%d, %d, %s",mesg.t,mesg.buflen,ctime(&mesg.curtime));
+    // printf("send packet:%d, %d, %s",mesg.t,mesg.buflen,ctime(&mesg.curtime));
     if(write(sockfd,&mesg,sizeof(mesg))==-1){
         return -1;
     }
@@ -108,18 +108,18 @@ int sendtext(int sockfd, const char* text, int id){
     struct Mesg mesg;
     mesg.t = send_mesg;
     mesg.curtime = time(NULL);
-    mesg.buflen = sizeof(text);
+    mesg.buflen = strlen(text)+1;
     if(sentMesg(sockfd,mesg)==-1){
         printf("send mesg failed\n");
         return -1;
     }
-    if(write(sockfd,text,sizeof(text))==-1){
+    if(write(sockfd,text,strlen(text)+1)==-1){
         return -1;
     }
     if(write(sockfd,&id,sizeof(id))==-1){
         return -1;
     }
-    printf("sent message to %d\n",id);
+    // printf("sent message to %d\n",id);
     return 0;
 }
 
@@ -135,7 +135,7 @@ int recvint(int sockfd){
         printf("recv integer failed\n");
         return -1;
     }
-    printf("recv integer:%d\n",buf);
+    // printf("recv integer:%d\n",buf);
     return buf;
 }
 

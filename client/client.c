@@ -14,6 +14,7 @@
 
 int sentstuinfo(int sockfd);
 void* waitrespon(void* arg);
+void printmenu();
 int getnewconnect(){
 	int sockfd;
 	struct sockaddr_in serverAddr;
@@ -44,6 +45,7 @@ int getnewconnect(){
 
 int main(int argc, char *argv[])
 {	
+	printmenu();
     int sockfd;
     sockfd = getnewconnect();
     char buf[200];
@@ -56,8 +58,10 @@ int main(int argc, char *argv[])
 	int cmd;
     pthread_t recv_thread;
     pthread_create(&recv_thread, NULL, waitrespon, (void*)&sockfd);
+	
 	while(1){
 		scanf("%d",&cmd);
+		setbuf(stdin,NULL);
 		switch(cmd){
 			case 1:{
 				if(askcurtime(sockfd)==-1)
@@ -81,8 +85,12 @@ int main(int argc, char *argv[])
 				int id;
 				char text[200];
 				memset(text,0,200);
-				scanf("%s",text);
+				printf("please input message content:\n");
+				fgets(text,sizeof(text)/sizeof(text[0]),stdin);
+				text[strlen(text)-1]='\0';
+				printf("Which client send to?\n");
 				scanf("%d",&id);
+				printf("input:%s\nto:%d\n",text,id);
 				sendtext(sockfd,(const char*)text,id);
 				break;
 			}
@@ -122,6 +130,7 @@ void* waitrespon(void* arg){
     int sockfd = *(int*)arg;
 	struct Mesg mesg;
     while(1){
+		// usleep(100);//avoid crash
 		mesg = ser_recvMesg(sockfd);
 		switch(mesg.t){
 			case reply_time:{
@@ -157,8 +166,19 @@ void* waitrespon(void* arg){
 			}
 			default:{
 				printf("unknown reply!\n");
+				return (void*)-1;
 				break;
 			}	
 		}	
 	}
+}
+
+void printmenu(){
+	printf("Welcome to our client, operating guides:\n");
+	printf(" \
+	1.\tget current server time\n \
+	2.\tget server information\n \
+	3.\tget all connected client from server\n \
+	4.\tsend message to specific client\n \
+	5.\tlogout\n");
 }

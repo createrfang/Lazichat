@@ -149,9 +149,10 @@ void* recvfromclient(void* arg){
 				destid = recvint(comfd);
 				if(clist[destid].id==-1){
 					printf("No such client:%d\n",destid);
-					sendtext(comfd,"Ohh,He-Sheisoffline",thisid);
+					sendtext(comfd,"Ohh,He/She is offline",thisid);
 				}
-				sendtext(clist[destid].sockid,buf,thisid);
+				else
+					sendtext(clist[destid].sockid,buf,thisid);
 				break;
 			}
 			case logout:{
@@ -166,7 +167,9 @@ void* recvfromclient(void* arg){
 				break;
 			}
 			default:{
-				printf("unknown request");
+				printf("unknown request, closing dangerous client\n");
+				close(comfd);
+				return (void*)0;
 				break;
 			}
    		}
