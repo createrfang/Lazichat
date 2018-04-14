@@ -1,7 +1,7 @@
 CC = gcc
 INCLUDE = -I.
 TARGET = Ser Cli
-LIBS = 
+LIBS = -lpthread
 
 all: $(TARGET)
 
