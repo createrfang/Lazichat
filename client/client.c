@@ -165,7 +165,7 @@ void* waitrespon(void* arg){
 				break;
 			}
 			case reply_name:{
-				recvserverinfo(sockfd);
+				recvserverinfo(sockfd,mesg.buflen);
 				break;
 			}
 			case send_mesg:{

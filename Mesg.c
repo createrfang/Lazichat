@@ -56,9 +56,10 @@ int askserverinfo(int sockfd){
     return 0;
 }
 
-int recvserverinfo(int sockfd){
+int recvserverinfo(int sockfd, int buflen){
     struct utsname buf;
-    read(sockfd,(struct utsname*)&buf,sizeof(buf));
+    printf("size:%d\n",sizeof(buf));
+    read(sockfd,(struct utsname*)&buf,buflen);
     printserverinfo(buf);
     return 0;
 }

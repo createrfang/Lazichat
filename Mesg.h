@@ -52,7 +52,7 @@ struct Mesg ser_recvMesg(int sockfd);
 void printserverinfo(struct utsname buf);
 void printClientconninfo(struct ClientCONN cnn);
 int sentserverinfo(int sockfd);
-int recvserverinfo(int sockfd);
+int recvserverinfo(int sockfd, int buflen);
 int askserverinfo(int sockfd);
 int recvstudentinfo(int comfd);
 int sendtext(int sockfd, const char* text, int id);
