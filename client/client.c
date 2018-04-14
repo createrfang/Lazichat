@@ -18,10 +18,32 @@ void printmenu();
 int getnewconnect(){
 	int sockfd;
 	struct sockaddr_in serverAddr;
-	
+	char buf[100];
+	int portnumber;
+	in_addr_t destaddr;
+	printf("Please press \'login\' to connect or \'local\' for test or \'exit\' for exit:\n");
+	fgets(buf,100,stdin);
+	if(strncmp(buf,"local",5)==0){
+		portnumber = SERVER_PORT;
+        destaddr = inet_addr(SERVER_ADDR);
+
+	}
+	else if (strncmp(buf,"login",5)==0){
+		printf("Please input server ipv4 addr: \n");
+		memset(buf,100,0);
+		fgets(buf,100,stdin);
+		destaddr = inet_addr(SERVER_ADDR);
+		printf("Please input server port: \n");
+		scanf("%d",&portnumber);
+	}
+	else if (strncmp(buf,"exit",4)==0){
+		printf("Bye bye~\n");
+		return -1;
+	}
 	// 创建一个socket：
 	if((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
 	{
+
 		printf("socket() failed! code:%d\n", errno);
 		return -1;
 	}
@@ -29,7 +51,7 @@ int getnewconnect(){
 	// 设置服务器的地址信息：
 	serverAddr.sin_family = AF_INET;
 	serverAddr.sin_port = htons(SERVER_PORT);
-	serverAddr.sin_addr.s_addr = inet_addr(SERVER_ADDR);
+	serverAddr.sin_addr.s_addr = destaddr;
 	bzero(&(serverAddr.sin_zero), 8);
 	//客户端发出连接请求：
 	printf("connecting!\n");
@@ -42,14 +64,20 @@ int getnewconnect(){
 	printf("Connected!\n");
     return sockfd;
 }
-
+int inapp(int sockfd);
 int main(int argc, char *argv[])
 {	
-	printmenu();
-    int sockfd;
-    sockfd = getnewconnect();
-    char buf[200];
-	
+	int sockfd;
+	while(1){
+		sockfd = getnewconnect();
+    	if(sockfd==-1) break;
+		inapp(sockfd);
+	}
+	return 0;
+}
+
+int inapp(int sockfd){
+	char buf[200];
 	if(read(sockfd,(char*)&buf,7)==-1){
 		printf("get respond failed!\n");
         return -1;
@@ -58,7 +86,7 @@ int main(int argc, char *argv[])
 	int cmd;
     pthread_t recv_thread;
     pthread_create(&recv_thread, NULL, waitrespon, (void*)&sockfd);
-	
+	printmenu();
 	while(1){
 		scanf("%d",&cmd);
 		setbuf(stdin,NULL);
@@ -66,7 +94,7 @@ int main(int argc, char *argv[])
 			case 1:{
 				if(askcurtime(sockfd)==-1)
 					printf("ask time failed!\n");
-				else printf("sent request!\n");
+				else printf("The current time is:\n");
 				break;
 			}
 			case 2:{
@@ -90,7 +118,7 @@ int main(int argc, char *argv[])
 				text[strlen(text)-1]='\0';
 				printf("Which client send to?\n");
 				scanf("%d",&id);
-				printf("input:%s\nto:%d\n",text,id);
+				//printf("input:%s\nto:%d\n",text,id);
 				sendtext(sockfd,(const char*)text,id);
 				break;
 			}
@@ -107,7 +135,6 @@ int main(int argc, char *argv[])
 		}
 		usleep(100000);
 	}
-	close(sockfd);//关闭套接字
 	return 0;
 }
 
@@ -131,7 +158,7 @@ void* waitrespon(void* arg){
 	struct Mesg mesg;
     while(1){
 		// usleep(100);//avoid crash
-		mesg = ser_recvMesg(sockfd);
+		mesg = cli_recvMesg(sockfd);
 		switch(mesg.t){
 			case reply_time:{
 				printf("%s",ctime(&mesg.curtime));

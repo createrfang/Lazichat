@@ -42,6 +42,8 @@ struct ClientCONN
     struct sockaddr_in client;
     pthread_t thread;
 };
+struct Mesg ser_recvMesg(int sockfd);
+struct Mesg cli_recvMesg(int sockfd);
 int sentMesg(int sockfd, struct Mesg mesg);
 int askcurtime(int sockfd);
 int sentcurtime(int sockfd);
