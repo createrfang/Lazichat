@@ -40,7 +40,7 @@ int sentserverinfo(int sockfd){
         printf("get name failed \n");
     }
     sentMesg(sockfd,mesg);
-    if(write(sockfd,&buf,sizeof(buf))==-1){
+    if(write(sockfd,&buf.nodename,sizeof(buf.nodename))==-1){
         return -1;
     }
     return 0;
@@ -57,10 +57,10 @@ int askserverinfo(int sockfd){
 }
 
 int recvserverinfo(int sockfd, int buflen){
-    struct utsname buf;
+    char  buf[buflen];
     printf("size:%d\n",sizeof(buf));
-    read(sockfd,(struct utsname*)&buf,buflen);
-    printserverinfo(buf);
+    read(sockfd,(char*)&buf,buflen);
+    printf("Server name:\t %s\n",buf);
     return 0;
 }
 
