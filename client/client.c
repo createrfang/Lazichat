@@ -32,7 +32,7 @@ int getnewconnect(){
 		printf("Please input server ipv4 addr: \n");
 		memset(buf,100,0);
 		fgets(buf,100,stdin);
-		destaddr = inet_addr(SERVER_ADDR);
+		destaddr = inet_addr(buf);
 		printf("Please input server port: \n");
 		scanf("%d",&portnumber);
 	}
