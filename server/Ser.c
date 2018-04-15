@@ -168,6 +168,7 @@ void* recvfromclient(void* arg){
 			}
 			default:{
 				printf("unknown request, closing dangerous client\n");
+				clist[thisid].id=-1;
 				close(comfd);
 				return (void*)0;
 				break;

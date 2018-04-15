@@ -50,7 +50,7 @@ int getnewconnect(){
 		
 	// 设置服务器的地址信息：
 	serverAddr.sin_family = AF_INET;
-	serverAddr.sin_port = htons(SERVER_PORT);
+	serverAddr.sin_port = htons(portnumber);
 	serverAddr.sin_addr.s_addr = destaddr;
 	bzero(&(serverAddr.sin_zero), 8);
 	//客户端发出连接请求：
